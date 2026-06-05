@@ -92,7 +92,9 @@
 `utils/heuristics.py` — تابع `manhattan(pos, goal)`:
 - هیوریستیک Manhattan Distance — پذیرفتنی (Admissible)
 
-`algorithms/*.py` — placeholder آماده برای هر دو نفر
+`algorithms/ucs.py` — پیاده‌سازی شده ✅ (فاز ۱)
+
+`algorithms/astar.py`, `genetic.py`, `idastar.py` — placeholder آماده
 
 `maps/scenario1..4_sample.txt` — نقشه‌های نمونه برای هر سناریو
 
@@ -105,23 +107,36 @@
 
 ---
 
-### فاز ۱ — Uniform Cost Search `[علیرضا نصیری]`
+### فاز ۱ — Uniform Cost Search `[علیرضا نصیری]` ✅
 
 > **هدف:** یافتن مسیر بهینه بدون اطلاعات پیشین، فقط با هزینه واقعی.
 
 **وظایف:**
-- [ ] پیاده‌سازی priority queue با `heapq` (بدون کتابخانه آماده)
-- [ ] مدیریت `visited` برای جلوگیری از حلقه
-- [ ] اعمال قوانین خانه Z (چرخه ۳۰ دقیقه‌ای، هزینه ۱ یا ۱۵)
-- [ ] اعمال قانون STAY (هزینه ۱ دقیقه)
-- [ ] بازگشت مسیر با بازسازی زنجیره والدها
-- [ ] شمارش `Expanded Nodes`
+- [x] پیاده‌سازی priority queue با `heapq` (بدون کتابخانه آماده)
+- [x] مدیریت `visited` برای جلوگیری از حلقه
+- [x] اعمال قوانین خانه Z (چرخه ۳۰ دقیقه‌ای، هزینه ۱ یا ۱۵)
+- [x] اعمال قانون STAY (هزینه ۱ دقیقه)
+- [x] بازگشت مسیر با بازسازی زنجیره والدها
+- [x] شمارش `Expanded Nodes`
 
-**خروجی مورد انتظار:**
+**جزئیات پیاده‌سازی:**
+- State: `(row, col)` اگر نقشه Z نداشته باشد، `(row, col, T % 30)` اگر داشته باشد
+- `T = node.g` — چون تمام هزینه‌ها بر حسب دقیقه‌اند، g دقیقاً برابر زمان سپری‌شده است
+- heap entries: `(cost, counter, node)` — counter از مقایسه مستقیم آبجکت‌های Node جلوگیری می‌کند
+- STAY فقط وقتی `has_zones()` صادق است تولید می‌شود؛ بدون Z هرگز در مسیر بهینه نیست
+
+**نتایج تست:**
+
+| نقشه | Cost | Actions | Expanded Nodes |
+|------|------|---------|----------------|
+| `scenario1_sample.txt` (۳×۳) | 4 min | `RIGHT, RIGHT, DOWN, DOWN` | 5 |
+| `scenario2_sample.txt` (۲×۴ با Z) | 4 min | `RIGHT, DOWN, RIGHT, RIGHT` | 14 |
+
+**خروجی نمونه:**
 ```
-Cost: X min
-Actions: ['RIGHT', 'DOWN', ...]
-Expanded nodes: Y
+Cost: 4 min
+Actions: ['RIGHT', 'RIGHT', 'DOWN', 'DOWN']
+Expanded nodes: 5
 ```
 
 **فایل:** `algorithms/ucs.py`
