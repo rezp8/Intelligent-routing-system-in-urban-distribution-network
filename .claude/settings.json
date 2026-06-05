@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python main.py --scenario 1 --map maps/scenario1_sample.txt)",
+      "Bash(python main.py --scenario 1 --map maps/scenario2_sample.txt)"
+    ]
+  }
+}
