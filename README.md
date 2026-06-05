@@ -42,7 +42,7 @@
 │   ├── ucs.py               # Uniform Cost Search   ✅  [علیرضا]
 │   ├── astar.py             # A* Search             ✅  [رضا]
 │   ├── genetic.py           # Genetic Algorithm     ✅  [رضا]
-│   └── idastar.py           # IDA* Search               [علیرضا]
+│   └── idastar.py           # IDA* Search           ✅  [علیرضا]
 ├── utils/
 │   ├── __init__.py
 │   └── heuristics.py        # manhattan(pos, goal)
@@ -98,7 +98,7 @@
 
 `algorithms/genetic.py` — پیاده‌سازی شده ✅ (فاز ۳)
 
-`algorithms/idastar.py` — placeholder آماده (فاز ۴)
+`algorithms/idastar.py` — پیاده‌سازی شده ✅ (فاز ۴)
 
 `maps/scenario1..4_sample.txt` — نقشه‌های نمونه برای هر سناریو
 
@@ -230,21 +230,40 @@ Best makespan (minutes): 3.00
 
 ---
 
-### فاز ۴ — IDA* `[علیرضا نصیری]`
+### فاز ۴ — IDA* `[علیرضا نصیری]` ✅
 
 > **هدف:** مسیریابی بهینه با حافظه محدود در نقشه‌ای با پل‌ها.
 
 **وظایف:**
-- [ ] پیاده‌سازی IDA* با depth-first iterative deepening روی `f(n)`
-- [ ] مدیریت `State` با وضعیت پل: `(x, y, on_bridge_id)`
-- [ ] اعمال قوانین پل:
+- [x] پیاده‌سازی IDA* با depth-first iterative deepening روی `f(n)`
+- [x] مدیریت `State` با وضعیت پل: `(row, col, bridge_chain_id)`
+- [x] اعمال قوانین پل:
   - ورود به اولین خانه پل: هزینه `k`
   - حرکت روی خانه‌های همان زنجیره: هزینه `0`
   - خروج و ورود مجدد: پرداخت مجدد `k`
-- [ ] جلوگیری از حلقه در مسیر جاری (نه visited سراسری)
-- [ ] شمارش `Expanded Nodes`
+- [x] جلوگیری از حلقه در مسیر جاری (نه visited سراسری)
+- [x] شمارش `Expanded Nodes`
 
-**مثال پل `B4`:** ورود اول هزینه ۴، حرکت بعدی روی همان پل هزینه ۰
+**جزئیات پیاده‌سازی:**
+- **هیوریستیک: `h = 0`** — Manhattan در نقشه‌های پل‌دار Admissible نیست؛ یک زنجیره Bk به طول L هزینه k دارد اما Manhattan می‌گوید L. اگر k < L آنگاه Manhattan هزینه واقعی را بیشتر از واقع برآورد می‌کند. h=0 همیشه admissible است و بهینگی را تضمین می‌کند.
+- **آستانه اولیه `threshold = 0`**، هر تکرار آستانه را به کمترین `f` که از آستانه قبل تجاوز کرد افزایش می‌دهد
+- **جلوگیری از حلقه:** مجموعه `on_path` شامل state‌های مسیر DFS جاری — نه visited سراسری؛ یک state ممکن است از مسیر دیگری با هزینه کمتر قابل دسترس باشد
+- **State** شامل `bridge_chain_id` است تا ورود به زنجیره جدید از ورود مجدد به همان زنجیره تفکیک شود
+
+**نتایج تست:**
+
+| نقشه | Cost | Actions | Expanded |
+|------|------|---------|----------|
+| `scenario4_sample.txt` (۳×۴، B4) | 6 min | `DOWN, RIGHT, RIGHT, RIGHT, DOWN` | 6 |
+| نقشه ۵×۴ با دو زنجیره B2 و B3 | 14 min | از B2 عبور، سپس مستقیم به G | 23 |
+| تست re-entry (دو زنجیره B2 جدا) | 6 min | جریمه ورود مجدد k=2 اعمال شد ✅ | — |
+
+**خروجی نمونه:**
+```
+Cost: 6 min
+Actions: ['DOWN', 'RIGHT', 'RIGHT', 'RIGHT', 'DOWN']
+Expanded nodes: 6
+```
 
 **فایل:** `algorithms/idastar.py`
 
