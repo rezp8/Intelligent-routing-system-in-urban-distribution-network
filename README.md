@@ -45,12 +45,21 @@
 │   └── idastar.py           # IDA* Search           ✅  [علیرضا]
 ├── utils/
 │   ├── __init__.py
-│   └── heuristics.py        # manhattan(pos, goal)
-├── maps/                    # نقشه‌های نمونه
+│   ├── heuristics.py        # manhattan(pos, goal)
+│   └── visualize.py         # render_path() — ASCII مسیر روی نقشه
+├── maps/
 │   ├── scenario1_sample.txt
+│   ├── scenario1_test1.txt  # ۴×۴ کریدور
+│   ├── scenario1_test2.txt  # ۵×۵ زیگزاگ
 │   ├── scenario2_sample.txt
+│   ├── scenario2_test1.txt  # ۳×۵ با Z
+│   ├── scenario2_test2.txt  # ۴×۵ با Z پراکنده
 │   ├── scenario3_sample.txt
-│   └── scenario4_sample.txt
+│   ├── scenario3_test1.txt  # ۵×۵، ۳ عامل
+│   ├── scenario3_test2.txt  # ۴×۵، ۲ عامل ۴ هدف
+│   ├── scenario4_sample.txt
+│   ├── scenario4_test1.txt  # ۳×۵، B2×4
+│   └── scenario4_test2.txt  # ۴×۶، B3×5
 └── report/                  # گزارش پروژه
     └── report.pdf
 ```
@@ -269,30 +278,97 @@ Expanded nodes: 6
 
 ---
 
-### فاز ۵ — تست و مستندسازی `[هر دو نفر]`
+### فاز ۵ — تست و مستندسازی `[هر دو نفر]` ✅
 
 > **هدف:** اطمینان از صحت پیاده‌سازی و آماده‌سازی گزارش.
 
 **وظایف:**
-- [ ] تست تمام ۴ سناریو با مثال‌های داده‌شده در PDF
-- [ ] ساخت حداقل ۲ نقشه جدید برای هر سناریو
-- [ ] مقایسه `Expanded Nodes` بین UCS و A* در گزارش
-- [ ] نوشتن گزارش ۳ تا ۵ صفحه‌ای شامل:
-  - توضیح ساختار داده‌ها
-  - طراحی الگوریتم ژنتیک
-  - تحلیل نتایج و مقایسه الگوریتم‌ها
+- [x] تست تمام ۴ سناریو با نقشه‌های نمونه
+- [x] ساخت ۲ نقشه جدید برای هر سناریو (۸ نقشه جدید)
+- [x] مقایسه `Expanded Nodes` بین UCS و A*
+- [x] نمایش ASCII مسیر روی نقشه (`--visualize`)
+- [ ] نوشتن گزارش ۳ تا ۵ صفحه‌ای شامل توضیح ساختار داده‌ها، طراحی الگوریتم ژنتیک، تحلیل نتایج
 
-**بخش اختیاری:**
-- [ ] نمایش گرافیکی مسیر روی نقشه (با `matplotlib` یا ASCII)
+---
+
+#### نقشه‌های جدید
+
+| فایل | سناریو | اندازه | توضیح |
+|------|--------|--------|-------|
+| `scenario1_test1.txt` | ۱ — UCS | ۴×۴ | کریدور ارزان در میان خانه‌های ۹ |
+| `scenario1_test2.txt` | ۱ — UCS | ۵×۵ | کریدور زیگزاگ |
+| `scenario2_test1.txt` | ۲ — A* | ۳×۵ | مسیر بهینه از میان سلول‌های Z |
+| `scenario2_test2.txt` | ۲ — A* | ۴×۵ | سلول‌های Z پراکنده |
+| `scenario3_test1.txt` | ۳ — ژنتیک | ۵×۵ | ۳ عامل، ۳ هدف |
+| `scenario3_test2.txt` | ۳ — ژنتیک | ۴×۵ | ۲ عامل، ۴ هدف |
+| `scenario4_test1.txt` | ۴ — IDA* | ۳×۵ | پل B2 مستقیم به هدف |
+| `scenario4_test2.txt` | ۴ — IDA* | ۴×۶ | پل B3 بلند |
+
+---
+
+#### نتایج کامل — سناریو ۱ و ۲ (UCS در برابر A*)
+
+| نقشه | Cost | UCS Expanded | A* Expanded | کاهش |
+|------|------|-------------|------------|-------|
+| `scenario1_sample` (۳×۳) | 4 | 5 | 5 | — |
+| `scenario1_test1` (۴×۴) | 6 | 7 | 7 | — |
+| `scenario1_test2` (۵×۵) | 8 | 9 | 9 | — |
+| `scenario2_sample` (۲×۴ + Z) | 4 | 14 | 5 | ۶۴٪ |
+| `scenario2_test1` (۳×۵ + Z) | 4 | 14 | 5 | ۶۴٪ |
+| `scenario2_test2` (۴×۵ + Z) | 7 | 38 | 9 | ۷۶٪ |
+
+> **نتیجه:** در نقشه‌های بدون Z، UCS و A* تعداد یکسانی گره expand می‌کنند زیرا هزینه‌های بالا (۹) مانع طبیعی هستند. در نقشه‌های با Z، فضای حالت به `(r, c, T%30)` گسترش می‌یابد و هیوریستیک A* تا ۷۶٪ کمتر گره بررسی می‌کند.
+
+---
+
+#### نتایج — سناریو ۳ (ژنتیک)
+
+| نقشه | تعداد عامل | تعداد هدف | Makespan | تخصیص |
+|------|-----------|----------|---------|--------|
+| `scenario3_sample` (۴×۴) | 2 | 2 | 3 min | S1→G1, S2→G2 |
+| `scenario3_test1` (۵×۵) | 3 | 3 | 4 min | S1→G1, S2→G2, S3→G3 |
+| `scenario3_test2` (۴×۵) | 2 | 4 | 3 min | S1→[G1,G2], S2→[G3,G4] |
+
+---
+
+#### نتایج — سناریو ۴ (IDA*)
+
+| نقشه | پل | Cost | Expanded | مسیر |
+|------|----|------|---------|------|
+| `scenario4_sample` (۳×۴) | B4×3 | 6 | 6 | DOWN, RIGHT×3, DOWN |
+| `scenario4_test1` (۳×۵) | B2×4 | 3 | 6 | DOWN, RIGHT×4 |
+| `scenario4_test2` (۴×۶) | B3×5 | 14 | 19 | DOWN, RIGHT×5, DOWN×2 |
+
+---
+
+#### نمایش ASCII مسیر (`--visualize`)
+
+```bash
+python main.py --scenario 1 --map maps/scenario1_test1.txt --visualize
+```
+
+```
+Cost: 6 min
+Actions: ['RIGHT', 'DOWN', 'DOWN', 'RIGHT', 'RIGHT', 'DOWN']
+Expanded nodes: 7
+
+---------------
+[S] [>]  9   9
+ 9  [v]  9   9
+ 9  [v] [>] [>]
+ 9   9   9  [G]
+---------------
+```
+
+`S` = شروع، `G` = هدف، `^v<>` = جهت حرکت در هر خانه
+
+**فایل:** `utils/visualize.py` | اجرا: `python main.py ... --visualize`
 
 ---
 
 ## نحوه اجرا
 
 ```bash
-# نصب پیش‌نیازها (اختیاری)
-pip install -r requirements.txt
-
 # سناریو ۱: UCS
 python main.py --scenario 1 --map maps/scenario1_sample.txt
 
@@ -304,6 +380,9 @@ python main.py --scenario 3 --map maps/scenario3_sample.txt
 
 # سناریو ۴: IDA*
 python main.py --scenario 4 --map maps/scenario4_sample.txt
+
+# نمایش ASCII مسیر روی نقشه (سناریوهای ۱، ۲، ۴)
+python main.py --scenario 1 --map maps/scenario1_test1.txt --visualize
 ```
 
 ---

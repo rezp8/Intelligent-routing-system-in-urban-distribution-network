@@ -45,6 +45,10 @@ def main() -> None:
         help='1 = UCS  |  2 = A*  |  3 = Genetic Algorithm  |  4 = IDA*',
     )
     parser.add_argument('--map', type=str, required=True, help='Path to map file')
+    parser.add_argument(
+        '--visualize', action='store_true',
+        help='Print an ASCII map with the solution path overlaid (scenarios 1, 2, 4)',
+    )
     args = parser.parse_args()
 
     try:
@@ -55,6 +59,11 @@ def main() -> None:
 
     result = run_scenario(args.scenario, grid)
     print_result(args.scenario, result)
+
+    if args.visualize and result and args.scenario != 3:
+        from utils.visualize import render_path
+        print()
+        print(render_path(grid, result['actions']))
 
 
 if __name__ == '__main__':
