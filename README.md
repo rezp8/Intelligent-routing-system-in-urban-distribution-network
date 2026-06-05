@@ -32,19 +32,20 @@
 ```
 .
 ├── README.md
-├── main.py                  # نقطه ورود اصلی برنامه
-├── map_parser.py            # خواندن و پردازش نقشه
+├── main.py                  # نقطه ورود — --scenario و --map
 ├── models/
-│   ├── node.py              # کلاس Node (حالت + هزینه + والد)
-│   ├── state.py             # تعریف State برای هر سناریو
-│   └── map_grid.py          # کلاس Map (نقشه + قوانین محیط)
+│   ├── __init__.py
+│   ├── map_grid.py          # کلاس MapGrid (parse + هزینه + پل + Z)
+│   └── node.py              # کلاس Node (state + g + parent + action)
 ├── algorithms/
-│   ├── ucs.py               # Uniform Cost Search
-│   ├── astar.py             # A* Search
-│   ├── genetic.py           # Genetic Algorithm
-│   └── idastar.py           # IDA* Search
+│   ├── __init__.py
+│   ├── ucs.py               # Uniform Cost Search       [علیرضا]
+│   ├── astar.py             # A* Search                 [علیرضا]
+│   ├── genetic.py           # Genetic Algorithm         [رضا]
+│   └── idastar.py           # IDA* Search               [رضا]
 ├── utils/
-│   └── heuristics.py        # توابع هیوریستیک
+│   ├── __init__.py
+│   └── heuristics.py        # manhattan(pos, goal)
 ├── maps/                    # نقشه‌های نمونه
 │   ├── scenario1_sample.txt
 │   ├── scenario2_sample.txt
@@ -58,21 +59,49 @@
 
 ## فازبندی پروژه
 
-### فاز ۰ — زیرساخت مشترک `[هر دو نفر]`
+### فاز ۰ — زیرساخت مشترک `[هر دو نفر]` ✅
 
 > **هدف:** پایه‌گذاری ساختار مشترک که هر دو الگوریتم‌نویس روی آن تکیه می‌کنند.
 
 **وظایف:**
-- [ ] طراحی فرمت فایل نقشه (ورودی استاندارد)
-- [ ] پیاده‌سازی `MapGrid` — خواندن ماتریس، تشخیص نوع خانه، محاسبه هزینه ورود
-- [ ] پیاده‌سازی `Node` — نگه‌داری وضعیت، هزینه `g(n)`، والد، و اکشن
-- [ ] تعریف `State` برای هر سناریو:
-  - سناریو ۱ و ۲: `(x, y)`
-  - سناریو ۲ با Z: `(x, y, T mod 30)`
-  - سناریو ۴: `(x, y, on_bridge)`
-- [ ] پیاده‌سازی `main.py` با دریافت آرگومان سناریو از کاربر
+- [x] طراحی فرمت فایل نقشه (ورودی استاندارد)
+- [x] پیاده‌سازی `MapGrid` — خواندن ماتریس، تشخیص نوع خانه، محاسبه هزینه ورود
+- [x] پیاده‌سازی `Node` — نگه‌داری وضعیت، هزینه `g(n)`، والد، و اکشن
+- [x] تعریف قرارداد `State` برای هر سناریو (tuple ساده، مدیریت داخل هر الگوریتم):
+  - سناریو ۱: `(row, col)`
+  - سناریو ۲: `(row, col)` یا `(row, col, T % 30)` اگر نقشه منطقه Z داشته باشد
+  - سناریو ۴: `(row, col, current_bridge_chain_id)`
+- [x] پیاده‌سازی `main.py` با دریافت آرگومان `--scenario` و `--map` از کاربر
 
-**فایل‌های مربوطه:** `map_parser.py`, `models/`
+**جزئیات پیاده‌سازی:**
+
+`models/map_grid.py` — کلاس `MapGrid`:
+- `from_file(path)` / `from_string(text)` — بارگذاری نقشه
+- `entry_cost(r, c, T, current_bridge_chain)` — هزینه ورود به خانه با در نظر گرفتن Z و پل
+- `neighbors(r, c)` — لیست `(action, nr, nc)` برای چهار جهت (بدون STAY)
+- `find_starts()` / `find_goals()` — یافتن موقعیت `S`/`G` یا `Si`/`Gi`
+- `has_zones()` / `has_bridges()` — تشخیص نوع سناریو
+- `bridge_chain_id(r, c)` — شناسه زنجیره پل (BFS روی خانه‌های هم‌k مجاور)
+
+`models/node.py` — کلاس `Node`:
+- فیلدهای `state`, `g`, `parent`, `action`
+- `path()` — بازسازی لیست گره‌ها از ریشه تا گره جاری
+- `actions()` — لیست اکشن‌های مسیر
+- `__lt__` برای پشتیبانی مستقیم از `heapq`
+
+`utils/heuristics.py` — تابع `manhattan(pos, goal)`:
+- هیوریستیک Manhattan Distance — پذیرفتنی (Admissible)
+
+`algorithms/*.py` — placeholder آماده برای هر دو نفر
+
+`maps/scenario1..4_sample.txt` — نقشه‌های نمونه برای هر سناریو
+
+**نکات مهم برای الگوریتم‌نویسان:**
+- State در IDA* باید `(row, col, current_bridge_chain_id)` باشد — `current_bridge_chain_id` همان chain_id خانه‌ای است که الان روی آن هستیم (نه خانه بعدی)
+- State در نقشه‌های دارای Z باید `(row, col, T % 30)` باشد — `map.has_zones()` این را مشخص می‌کند
+- STAY را الگوریتم‌ها خودشان اضافه می‌کنند (در `neighbors` نیست)
+
+**فایل‌های مربوطه:** `models/map_grid.py`, `models/node.py`, `utils/heuristics.py`, `main.py`, `maps/`
 
 ---
 
