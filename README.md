@@ -180,26 +180,46 @@ Expanded nodes: 5
 
 ---
 
-### فاز ۳ — Genetic Algorithm `[رضا پیردیر]`
+### فاز ۳ — Genetic Algorithm `[رضا پیردیر]` ✅
 
 > **هدف:** تخصیص بهینه اهداف بین چند عامل برای کمینه کردن Makespan.
 
 **وظایف:**
-- [ ] تعریف کروموزوم (نمایش تخصیص اهداف به عاملها + ترتیب بازدید)
-- [ ] پیاده‌سازی تابع Fitness:
-  `Fitness = -Makespan = -max(T1, T2, ..., Tk)`
-  (هزینه مسیر با فاصله منهتن محاسبه می‌شود)
-- [ ] پیاده‌سازی عملگر Crossover (ترکیب دو کروموزوم)
-- [ ] پیاده‌سازی عملگر Mutation (جهش تصادفی)
-- [ ] انتخاب (Selection) — مثلاً Tournament Selection
-- [ ] تعیین پارامترها: اندازه جمعیت، نرخ جهش، تعداد نسل
-- [ ] چاپ بهترین تخصیص در پایان
+- [x] تعریف کروموزوم (نمایش تخصیص اهداف به عاملها + ترتیب بازدید)
+- [x] پیاده‌سازی تابع Fitness:
+  `Makespan = max(T1, T2, ..., Tk)` — هزینه هر مسیر با Manhattan Distance
+- [x] پیاده‌سازی عملگر Crossover (OX1 — Order Crossover)
+- [x] پیاده‌سازی عملگر Mutation (جابجایی تصادفی دو موقعیت)
+- [x] انتخاب با Tournament Selection
+- [x] تعیین پارامترها: جمعیت ۱۵۰، نرخ جهش ۱۵٪، ۴۰۰ نسل، elitism
 
-**خروجی مورد انتظار:**
+**جزئیات پیاده‌سازی:**
+
+**نمایش کروموزوم — route-with-separators:**
+کروموزوم یک permutation با طول `num_goals + num_agents - 1` است.
+عناصر `0..m-1` ایندکس اهداف هستند؛ عناصر `m..` توکن جداکننده بین عامل‌ها.
 ```
-Best makespan (minutes): X.XX
-  S1 at (r, c) assigned targets: ['G1'] -> coords: [(r, c)]
-  S2 at (r, c) assigned targets: ['G2'] -> coords: [(r, c)]
+مثال (2 عامل، 2 هدف): [0, SEP, 1]  →  S1:[G1]  S2:[G2]  makespan=3 ✓
+```
+این نمایش OX crossover استاندارد را مستقیماً ممکن می‌کند.
+
+**عملگرها:**
+- `_ox_crossover(p1, p2)` — یک بازه تصادفی از p1 نگه می‌دارد، بقیه را از p2 به ترتیب پر می‌کند
+- `_mutate(chrom, rate)` — با احتمال `rate` دو موقعیت تصادفی را عوض می‌کند
+- `_tournament(pop, scores, k=3)` — کمترین makespan را از k نامزد تصادفی انتخاب می‌کند
+
+**نتایج تست:**
+
+| نقشه | Makespan | تخصیص |
+|------|----------|--------|
+| `scenario3_sample.txt` (۲ عامل، ۲ هدف) | 3 min | S1→G1, S2→G2 |
+| نقشه ۳ عامل ۴ هدف | 4 min | S1→G1, S2→G2, S3→[G3,G4] |
+
+**خروجی نمونه:**
+```
+Best makespan (minutes): 3.00
+  S1 at (0, 0) assigned targets: ['G1'] -> coords: [(0, 3)]
+  S2 at (2, 0) assigned targets: ['G2'] -> coords: [(2, 2)]
 ```
 
 **فایل:** `algorithms/genetic.py`
