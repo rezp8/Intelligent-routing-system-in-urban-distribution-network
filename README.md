@@ -39,10 +39,10 @@
 │   └── node.py              # کلاس Node (state + g + parent + action)
 ├── algorithms/
 │   ├── __init__.py
-│   ├── ucs.py               # Uniform Cost Search       [علیرضا]
-│   ├── astar.py             # A* Search                 [علیرضا]
-│   ├── genetic.py           # Genetic Algorithm         [رضا]
-│   └── idastar.py           # IDA* Search               [رضا]
+│   ├── ucs.py               # Uniform Cost Search   ✅  [علیرضا]
+│   ├── astar.py             # A* Search             ✅  [رضا]
+│   ├── genetic.py           # Genetic Algorithm     ✅  [رضا]
+│   └── idastar.py           # IDA* Search               [علیرضا]
 ├── utils/
 │   ├── __init__.py
 │   └── heuristics.py        # manhattan(pos, goal)
@@ -94,7 +94,11 @@
 
 `algorithms/ucs.py` — پیاده‌سازی شده ✅ (فاز ۱)
 
-`algorithms/astar.py`, `genetic.py`, `idastar.py` — placeholder آماده
+`algorithms/astar.py` — پیاده‌سازی شده ✅ (فاز ۲)
+
+`algorithms/genetic.py` — پیاده‌سازی شده ✅ (فاز ۳)
+
+`algorithms/idastar.py` — placeholder آماده (فاز ۴)
 
 `maps/scenario1..4_sample.txt` — نقشه‌های نمونه برای هر سناریو
 
